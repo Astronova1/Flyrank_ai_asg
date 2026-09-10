@@ -96,20 +96,20 @@ app.get('/', (req, res) => {
 });
 
 app.get('/tasks', (req, res) => {
-  res.status(200).json(tasks);
+  const all_tasks = db.prepare("SELECT * FROM tasks").all()
+    res.status(200).json(all_tasks) 
 });
 
 app.get('/tasks/:id', (req, res) => {
   const id = parseInt(req.params.id);
-  const task = tasks.find(task => task.id === id);
+  const task = db.prepare("SELECT * FROM tasks WHERE id= ?").get(req.params.id);
   if (!task) {
     return res.status(404).json({ error: `Task ${id} not available /found` });
   }
 
-  res.json(task);
+  res.status(200).json(task);
 });
 
-app.get
 
 app.get('/health',(req,res) => {
   res.json({ status: 'ok'})
