@@ -4,6 +4,71 @@ const port = 3000;
 
 app.use(express.json());
 
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = {
+  openapi: '3.0.0',
+  info: {
+    title: 'Task API',
+    version: '1.0.0',
+    description: 'A simple CRUD API for managing tasks'
+  },
+  servers: [{ url: 'http://localhost:3000' }],
+  paths: {
+    '/tasks': {
+      get: {
+        summary: 'Get all tasks',
+        responses: { '200': { description: 'List of tasks' } }
+      },
+      post: {
+        summary: 'Create a new task',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: { title: { type: 'string' } },
+                required: ['title']
+              }
+            }
+          }
+        },
+        responses: { '201': { description: 'Created task' } }
+      }
+    },
+    '/tasks/{id}': {
+      get: {
+        summary: 'Get a single task by ID',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
+        responses: { '200': { description: 'Task found' }, '404': { description: 'Not found' } }
+      },
+      put: {
+        summary: 'Update a task',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  title: { type: 'string' },
+                  done: { type: 'boolean' }
+                }
+              }
+            }
+          }
+        },
+        responses: { '200': { description: 'Updated task' } }
+      },
+      delete: {
+        summary: 'Delete a task',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
+        responses: { '204': { description: 'Deleted' }, '404': { description: 'Not found' } }
+      }
+    }
+  }
+};
+
 app.get('/', (req, res) => {
   res.json({
     name: 'Task API',
@@ -79,8 +144,10 @@ app.delete('/tasks/:id', (req, res) => {
     return res.status(404).json({ error: `Task ${id} not found` });
   }
   tasks.splice(index, 1);
-  res.status(204).send({res,"Successfully deleted"}); 
+  res.status(204).json({s,"Successfully deleted"}); 
 });
+
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
