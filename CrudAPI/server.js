@@ -84,7 +84,7 @@ let tasks = [
 ];
 
 app.get('/tasks', (req, res) => {
-  res.json(tasks);
+  res.status(200).json(tasks);
 });
 
 app.get('/tasks/:id', (req, res) => {
@@ -134,7 +134,7 @@ app.put('/tasks/:id',(req,res) => {
   if (done !== undefined) {
     task.done = Boolean(done);
   }
-  res.json(task);
+  res.status(200).json(task);
 })
 
 app.delete('/tasks/:id', (req, res) => {
