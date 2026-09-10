@@ -8,3 +8,10 @@
 | POST   | `/tasks`      | Create a new task               |
 | PUT    | `/tasks/:id`  | Update a task                   |
 | DELETE | `/tasks/:id`  | Delete a task                   |
+
+
+## ScreenShot Of CURL
+![alt text](image.png)
+
+## Swagger 
+![Swagger all api endpoints](image-1.png)
