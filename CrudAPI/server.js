@@ -144,7 +144,7 @@ app.delete('/tasks/:id', (req, res) => {
     return res.status(404).json({ error: `Task ${id} not found` });
   }
   tasks.splice(index, 1);
-  res.status(204).json({s,"Successfully deleted"}); 
+  res.status(204).send(); 
 });
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
