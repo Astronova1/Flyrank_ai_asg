@@ -10,7 +10,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS tasks(
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   title TEXT NOT NULL,
-  done boolean NOT NULL
+  done INTEGER NOT NULL DEFAULT 0
   )
   `)
 
@@ -116,22 +116,23 @@ app.get('/health',(req,res) => {
 });
 
 app.post('/tasks',(req,res) => {
-  const {title} = req.body;
+  const {title, done} = req.body;
   if (!title || title.trim() === '') {
     return res.status(400).json({error: "Title is required"})
   }
+  const doneValue = done ? 1 : 0
   const new_task = db.prepare('INSERT INTO tasks (title,done) VALUES (?,?)')
-  .run(title.trim(),donevalue)
+  .run(title.trim(),doneValue)
   res.status(201).json({
-    id:info.lastInsertRowid,
+    id:new_task.lastInsertRowid,
     title: title.trim(),
-    true: doneValue
+    done: doneValue
   }) 
 })
 
 app.put('/tasks/:id',(req,res) => {
   const id = parseInt(req.params.id)
-  const task = tasks.find(t=> t.id === id)
+  const task = db.prepare("SELECT id FROM tasks WHERE id= ?")
   if (!task){
     return res.status(404).json({error: `Task not found`})
   }
@@ -142,20 +143,23 @@ app.put('/tasks/:id',(req,res) => {
     }
     task.title = title.trim();
   }
-  if (done !== undefined) {
-    task.done = Boolean(done);
+  if (done) {
+    doneValue = 1 
+  }
+  else {
+    doneValue = 0
   }
   res.status(200).json(task);
 })
 
 app.delete('/tasks/:id', (req, res) => {
   const id = parseInt(req.params.id);
-  const index = tasks.findIndex(t => t.id === id);
-  if (index === -1) {
-    return res.status(404).json({ error: `Task ${id} not found` });
+  const exisitng = db.prepare("SELECT id FROM tasks WHERE id= ?").get(id)
+  if (!exisitng){
+    return res.status(404).json({ error: `Task ${id} not found`})
   }
-  tasks.splice(index, 1);
-  res.status(204).send(); 
+  const upd = udb.prepare("DELETE FROM Tasks WHERE id=?").run(id)
+  res.status(200).json(upd)
 });
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
