@@ -1,26 +1,19 @@
 const Database = require('better-sqlite3');
 const express = require('express');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(express.json());
+const repo = require('./postgrerepo')
 
-const db = new Database('tasks.db')
-db.exec(`
-  CREATE TABLE IF NOT EXISTS tasks(
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  title TEXT NOT NULL,
-  done INTEGER NOT NULL DEFAULT 0
-  )
-  `)
 
-const dbcheck = db.prepare('SELECT COUNT(*) AS count FROM tasks').get()
-if (dbcheck.count ===0){
-  const insert = db.prepare('INSERT INTO tasks(title,done) VALUES (?,?)') 
-  insert.run("Shopping",0)
-  insert.run("Workout",0)
-  insert.run("study",0)
-}
+// const dbcheck = db.prepare('SELECT COUNT(*) AS count FROM tasks').get()
+// if (dbcheck.count ===0){
+//   const insert = db.prepare('INSERT INTO tasks(title,done) VALUES (?,?)') 
+//   insert.run("Shopping",0)
+//   insert.run("Workout",0)
+//   insert.run("study",0)
+// }
 
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = {
@@ -95,14 +88,13 @@ app.get('/', (req, res) => {
   })
 });
 
-app.get('/tasks', (req, res) => {
-  const all_tasks = db.prepare("SELECT * FROM tasks").all()
+app.get('/tasks', async (req, res) => {
+  const all_tasks = await repo.getAll()
     res.status(200).json(all_tasks) 
 });
 
-app.get('/tasks/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const task = db.prepare("SELECT * FROM tasks WHERE id= ?").get(req.params.id);
+app.get('/tasks/:id'  , async (req, res) => {
+  const task = await repo.getById(req.params.id);
   if (!task) {
     return res.status(404).json({ error: `Task ${id} not available /found` });
   }
@@ -115,18 +107,13 @@ app.get('/health',(req,res) => {
   res.json({ status: 'ok'})
 });
 
-app.post('/tasks',(req,res) => {
+app.post('/tasks',async (req,res) => {
   const {title, done} = req.body;
   if (!title || title.trim() === '') {
     return res.status(400).json({error: "Title is required"})
   }
-  const doneValue = done ? 1 : 0
-  const new_task = db.prepare('INSERT INTO tasks (title,done) VALUES (?,?)')
-  .run(title.trim(),doneValue)
-  res.status(201).json({
-    id:new_task.lastInsertRowid,
-    title: title.trim(),
-    done: doneValue
+  const new_task = await repo.create(title.trim(),Boolean(done))
+  res.status(201).json({new_task
   }) 
 })
 
