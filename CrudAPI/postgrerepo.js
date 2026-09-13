@@ -8,13 +8,13 @@ module.exports={
     },
 
     async getById(id){
-        const {row} = await pool.query('SELECT * FROM tasks WHERE id= $1',[id])
-        return row[0] || null
+        const {rows} = await pool.query('SELECT * FROM tasks WHERE id= $1',[id])
+        return rows[0] || null
     },
     
     async create(title,done){
-        const {row} = await pool.query('INSERT INTO tasks(title,done) VALUES ($1, $2) RETURNING *', [title,done])
-        return[0]
+        const {rows} = await pool.query('INSERT INTO tasks(title,done) VALUES ($1, $2) RETURNING *', [title,done])
+        return rows[0]
     },
 
     async update(id,title,done){
