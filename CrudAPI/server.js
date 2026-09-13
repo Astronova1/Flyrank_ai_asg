@@ -1,11 +1,11 @@
-const Database = require('better-sqlite3');
+require('dotenv').config()
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
+const swaggerUi = require('swagger-ui-express');
 
 app.use(express.json());
 const repo = require('./postgrerepo')
-
 
 // const dbcheck = db.prepare('SELECT COUNT(*) AS count FROM tasks').get()
 // if (dbcheck.count ===0){
@@ -15,7 +15,6 @@ const repo = require('./postgrerepo')
 //   insert.run("study",0)
 // }
 
-const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = {
   openapi: '3.0.0',
   info: {
@@ -96,7 +95,7 @@ app.get('/tasks', async (req, res) => {
 app.get('/tasks/:id'  , async (req, res) => {
   const task = await repo.getById(req.params.id);
   if (!task) {
-    return res.status(404).json({ error: `Task ${id} not available /found` });
+    return res.status(404).json({ error: `Task not available found` });
   }
 
   res.status(200).json(task);
@@ -113,43 +112,28 @@ app.post('/tasks',async (req,res) => {
     return res.status(400).json({error: "Title is required"})
   }
   const new_task = await repo.create(title.trim(),Boolean(done))
-  res.status(201).json({new_task
-  }) 
+  res.status(201).json(new_task) 
 })
 
-app.put('/tasks/:id',(req,res) => {
-  const id = parseInt(req.params.id)
-  const task = db.prepare("SELECT id FROM tasks WHERE id= ?")
-  if (!task){
-    return res.status(404).json({error: `Task not found`})
+app.put('/tasks/:id', async (req, res) => {
+  const { title, done } = req.body;
+  if (!title || title.trim() === '') {
+    return res.status(400).json({ error: 'Title is required' });
   }
-    const { title, done } = req.body;
-  if (title !== undefined) {
-    if (title.trim() === '') {
-      return res.status(400).json({ error: 'Title cannot be empty' });
-    }
-    task.title = title.trim();
-  }
-  if (done) {
-    doneValue = 1 
-  }
-  else {
-    doneValue = 0
-  }
-  res.status(200).json(task);
-})
+  const updated = await repo.update(req.params.id, title.trim(), Boolean(done));
+  if (!updated) return res.status(404).json({ error: 'Task not found' });
+  res.json(updated);
+});
 
-app.delete('/tasks/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const exisitng = db.prepare("SELECT id FROM tasks WHERE id= ?").get(id)
-  if (!exisitng){
-    return res.status(404).json({ error: `Task ${id} not found`})
-  }
-  const upd = udb.prepare("DELETE FROM Tasks WHERE id=?").run(id)
-  res.status(200).json(upd)
+app.delete('/tasks/:id', async (req, res) => {
+  const existing = await repo.getById(req.params.id);
+  if (!existing) return res.status(404).json({ error: 'Task not found' });
+  await repo.remove(req.params.id);
+  res.status(204).send();
 });
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
