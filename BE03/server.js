@@ -1,13 +1,10 @@
-require('dotenv').config()
-const express = require('express');
-const app = express();
-const port = process.env.PORT || 3000;
-const url = process.env.SUPABASE_URL
-const key = process.env.SUPABASE_KEY
-const { createClient } = require('@supabase/supabase-js');
+import 'dotenv/config'
+import express from 'express'
+import supabase from './lib/supabase.js'
 
+const app = express()
+const port = process.env.PORT || 3000
 app.use(express.json());
-const supabase = createClient(url,key)
 
 
 app.listen(port, () => {
