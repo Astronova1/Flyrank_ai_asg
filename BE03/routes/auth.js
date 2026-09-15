@@ -1,5 +1,6 @@
 import express from 'express'
 import supabase from '../lib/supabase.js'
+import requireAuth from '../middleware/reqAuth.js'
 
 const router = express.Router()
 
@@ -42,5 +43,15 @@ router.post('/login', async(req,res)=>{
         }
     )
 })
+
+router.post('/signout', requireAuth, async(req,res) =>{
+    const {error} = await supabase.auth.signOut({scope: "local"})
+    if(error){
+        console.warn('Logout warning', error.message)
+    }
+
+    res.status(200).send()
+})
+
 
 export default router
