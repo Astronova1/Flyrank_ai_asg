@@ -1,11 +1,12 @@
 import express from 'express'
-import extractToken from '../middleware/reqAuth.js'
+import requireAuth from '../middleware/reqAuth.js'
 const router = express.Router()
 
-router.get('/profile', extractToken, (req, res) => {
-  console.log(req.token); 
-  
-  res.status(200).json({ token_received: req.token.slice(0, 10) + '...' });
+router.get('/profile', requireAuth, (req, res) => {  
+  res.status(200).json({  
+    id: req.user.id,
+    email: req.user.email,
+    created_at: req.user.created_at});
 });
 
 export default router
