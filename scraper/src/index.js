@@ -12,7 +12,7 @@ async function main(){
     const status = cacheHit? 'CacheHit' : 'CacheMiss'
     console.log(`${status} -${URL}`)
     console.log(`saved to ${cachePath}`)
-    console.log(`size: ${html?.length ?? 0} bytes`);
+    console.log(`size: ${html.length} bytes`);
 }
 
     main().catch(err => {

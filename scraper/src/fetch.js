@@ -5,8 +5,8 @@ const timeInterval = 20_000
 
 export async function fetchPageAndCache(url, cachepath){
     try{
-        const page = await fs.readFile(cachepath,{encoding: 'utf8'})
-        return {page, cacheHit: true}
+        const html = await fs.readFile(cachepath,{encoding: 'utf8'})
+        return {html, cacheHit: true}
     }
     catch {
         //cache miss, create new file
