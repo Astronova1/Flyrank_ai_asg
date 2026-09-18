@@ -1,9 +1,17 @@
+import { createHash } from 'node:crypto'
 import fs from 'node:fs/promises'
+import path from 'node:path'
 
 const userAgent = 'Flyrank internshipt project'
 const timeInterval = 20_000
 
-export async function fetchPageAndCache(url, cachepath){
+export async function fetchPageAndCache(url){
+
+    const parseUrl = new URL(url)
+    parseUrl.searchParams.sort()
+    const hash = createHash('sha256').update(parseUrl.toString()).digest('hex')
+    const cachepath = path.join('cache', `${hash}.html`) 
+
     try{
         const html = await fs.readFile(cachepath,{encoding: 'utf8'})
         return {html, cacheHit: true}

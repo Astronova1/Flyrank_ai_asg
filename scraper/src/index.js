@@ -2,7 +2,6 @@ import { fetchPageAndCache } from "./fetch.js";
 import { mkdir } from "node:fs/promises";
 
 const URL = 'https://books.toscrape.com/'
-const cachePath = './cache/catelogpage1.html'
 
 async function main(){
     await mkdir('cache', {recursive: true})
