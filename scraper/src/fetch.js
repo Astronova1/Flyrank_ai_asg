@@ -17,7 +17,6 @@ export async function fetchPageAndCache(url){
 
     try{
         const html = await fs.readFile(cachepath,{encoding: 'utf8'})
-        await sleep(DELAY_MS);
         return {html, cacheHit: true}
     }
     catch {
@@ -31,7 +30,7 @@ export async function fetchPageAndCache(url){
 
 
     if (!response.ok){
-        throw Error(`${response.Error} for url${URL}`)
+        throw Error(`${response.status} for url${URL}`)
     }
 
     const html = await response.text()
