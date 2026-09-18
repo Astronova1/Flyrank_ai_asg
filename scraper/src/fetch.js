@@ -5,6 +5,9 @@ import path from 'node:path'
 const userAgent = 'Flyrank internshipt project'
 const timeInterval = 20_000
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const DELAY_MS = 500;
+
 export async function fetchPageAndCache(url){
 
     const parseUrl = new URL(url)
@@ -14,6 +17,7 @@ export async function fetchPageAndCache(url){
 
     try{
         const html = await fs.readFile(cachepath,{encoding: 'utf8'})
+        await sleep(DELAY_MS);
         return {html, cacheHit: true}
     }
     catch {
