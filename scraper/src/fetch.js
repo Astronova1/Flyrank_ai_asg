@@ -23,7 +23,7 @@ export async function fetchPageAndCache(url){
         //cache miss, create new file
     }
 
-    const response = await fetch(url, {
+    const response = await fetchWithRetry(url, {
         headers: { 'User-Agent': userAgent},
         signal: AbortSignal.timeout(timeInterval)
     })
@@ -37,4 +37,29 @@ export async function fetchPageAndCache(url){
 
     await fs.writeFile(cachepath,html, 'utf8')
     return {html, cacheHit: false}
+}
+
+async function fetchOnce(url) {
+  const response = await fetch(url, {
+    headers: { 'User-Agent': userAgent },
+    signal: AbortSignal.timeout(timeInterval)
+  });
+  if (!response.ok) {
+    const err = new Error(`HTTP ${response.status} for ${url}`);
+    err.status = response.status;
+    err.retryable = response.status >= 500;
+    throw err;
+  }
+  return response.text();
+}
+
+async function fetchWithRetry(url) {
+  try {
+    return await fetchOnce(url);
+  } catch (err) {
+    if (!err.retryable) throw err;  
+    console.warn(`RETRY ${url} — ${err.message}`);
+    await sleep(DELAY_MS);
+    return await fetchOnce(url);  
+  }
 }
