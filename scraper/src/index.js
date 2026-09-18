@@ -11,9 +11,6 @@ async function main() {
   await mkdir('./cache', { recursive: true });
 
   const { books } = await discoverBooks();
-
-books.set('https://books.toscrape.com/catalogue/this-does-not-exist_9999/index.html', 'https://books.toscrape.com/');
-
   const records = [];
   const skipped = [];
   let pagesFetched = 0;
